@@ -14,7 +14,11 @@ The architecture illustrates request configuration → per-item processing → v
 
 ## My role
 
-_To be completed with verified individual contributions before publishing._
+- Designed the end-to-end automation architecture, including workflow logic, AI integrations, data processing, and output management.
+- Planned and structured the workflow to support automated visual asset generation for website development.
+- Led testing and validation to ensure the workflow produced consistent and usable outputs.
+- Implemented improvements to optimize workflow efficiency, output quality, and reliability.
+- Managed ongoing maintenance, troubleshooting, and workflow refinement.
 
 ## Confidentiality
 
