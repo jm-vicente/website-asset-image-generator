@@ -1,0 +1,313 @@
+{
+  "project": "Website Asset Image Generator",
+  "artifact_type": "sanitized technical architecture reference",
+  "n8n_importable": false,
+  "description": "Generalized illustration of a batch asset-generation workflow. This is not a faithful export of the original business use case.",
+  "redaction_notice": "Original business context, node code, model prompts, credentials, record schemas, company identifiers, URLs, IDs and production settings excluded. Example fields are illustrative only.",
+  "architecture": {
+    "pipeline": [
+      "Request configuration",
+      "Batch expansion",
+      "Previous output review",
+      "Variation guidance",
+      "Structured text generation",
+      "Image generation",
+      "Response parsing",
+      "Asset metadata storage"
+    ]
+  },
+  "nodes": [
+    {
+      "name": "Manual Trigger",
+      "node_type": "manualTrigger",
+      "position": [
+        0,
+        304
+      ],
+      "purpose": "Start a controlled asset generation run.",
+      "technical_outline": {
+        "trigger": "manual run",
+        "input": "operator initiates workflow"
+      }
+    },
+    {
+      "name": "Set Asset Request",
+      "node_type": "set",
+      "position": [
+        224,
+        304
+      ],
+      "purpose": "Define sanitized example inputs for asset generation.",
+      "technical_outline": {
+        "fields": {
+          "asset_category": "website illustration",
+          "count": 3,
+          "style_direction": "clean editorial visual"
+        },
+        "example_only": true
+      }
+    },
+    {
+      "name": "Prepare Batch Items",
+      "node_type": "code",
+      "position": [
+        448,
+        304
+      ],
+      "purpose": "Expand request into individually processed work items.",
+      "technical_outline": {
+        "logic_outline": [
+          "Read requested quantity and asset category",
+          "Clamp quantity to configured limit",
+          "Emit one work item per requested asset"
+        ],
+        "emits": [
+          "batch_index",
+          "asset_category",
+          "style_direction"
+        ]
+      }
+    },
+    {
+      "name": "Batch Completed",
+      "node_type": "set",
+      "position": [
+        912,
+        32
+      ],
+      "purpose": "Emit a completion marker after the loop.",
+      "technical_outline": {
+        "output": {
+          "status": "batch complete"
+        }
+      }
+    },
+    {
+      "name": "Read Asset Registry",
+      "node_type": "googleSheets",
+      "position": [
+        912,
+        208
+      ],
+      "purpose": "Read preexisting generated-asset metadata for variation checks.",
+      "technical_outline": {
+        "operation": "read",
+        "data_source": "example asset registry (not a live spreadsheet)",
+        "fields_used": [
+          "asset_title",
+          "style_tag",
+          "visual_summary"
+        ]
+      }
+    },
+    {
+      "name": "Build Variation Constraints",
+      "node_type": "code",
+      "position": [
+        1120,
+        208
+      ],
+      "purpose": "Prepare compact variation guidance to reduce repetition.",
+      "technical_outline": {
+        "logic_outline": [
+          "Collect previously used metadata",
+          "Derive previously seen title/style patterns",
+          "Provide high-level exclusions to generation step"
+        ],
+        "emits": [
+          "variation_guidance",
+          "batch_index",
+          "asset_category"
+        ]
+      }
+    },
+    {
+      "name": "Generate Asset Brief (LLM)",
+      "node_type": "httpRequest",
+      "position": [
+        1344,
+        208
+      ],
+      "purpose": "Request structured visual concept metadata from a text generation model.",
+      "technical_outline": {
+        "method": "POST (illustrative)",
+        "service_type": "text-generation API",
+        "request_shape": {
+          "asset_category": "<asset category>",
+          "style_direction": "<style guide>",
+          "variation_guidance": "<generated constraints>"
+        },
+        "response_shape": {
+          "asset_title": "string",
+          "visual_description": "string",
+          "image_prompt": "string"
+        },
+        "api_endpoint": "OMITTED",
+        "prompt_template": "OMITTED"
+      }
+    },
+    {
+      "name": "Parse Structured Brief",
+      "node_type": "code",
+      "position": [
+        1568,
+        208
+      ],
+      "purpose": "Validate and normalize the text-model structured response.",
+      "technical_outline": {
+        "logic_outline": [
+          "Parse text-model response as structured data",
+          "Confirm visual description and image-prompt fields exist",
+          "Normalize keys and prepare image-generation request"
+        ],
+        "emits": [
+          "asset_title",
+          "image_prompt",
+          "metadata"
+        ]
+      }
+    },
+    {
+      "name": "Generate Image (Image Model)",
+      "node_type": "httpRequest",
+      "position": [
+        1792,
+        208
+      ],
+      "purpose": "Generate an image from the normalized, sanitized asset brief.",
+      "technical_outline": {
+        "method": "POST (illustrative)",
+        "service_type": "image-generation API",
+        "request_shape": {
+          "prompt": "<normalized image prompt>",
+          "output_format": "image"
+        },
+        "response_shape": {
+          "image_payload": "<binary or encoded image>",
+          "mime_type": "image/png"
+        },
+        "api_endpoint": "OMITTED",
+        "model_specific_parameters": "OMITTED"
+      }
+    },
+    {
+      "name": "Parse Image Result",
+      "node_type": "code",
+      "position": [
+        2000,
+        208
+      ],
+      "purpose": "Extract image data and relevant delivery metadata.",
+      "technical_outline": {
+        "logic_outline": [
+          "Locate image payload in generation response",
+          "Extract media type and output metadata",
+          "Prepare record for downstream persistence"
+        ],
+        "emits": [
+          "image_payload",
+          "mime_type",
+          "asset_title"
+        ]
+      }
+    },
+    {
+      "name": "Save Asset Metadata",
+      "node_type": "googleSheets",
+      "position": [
+        2224,
+        208
+      ],
+      "purpose": "Append high-level generated-asset record to a registry.",
+      "technical_outline": {
+        "operation": "append",
+        "destination": "example asset registry (not a live spreadsheet)",
+        "example_columns": [
+          "asset_title",
+          "asset_category",
+          "generated_at",
+          "output_reference"
+        ]
+      }
+    },
+    {
+      "name": "Process Batch",
+      "node_type": "splitInBatches",
+      "position": [
+        672,
+        304
+      ],
+      "purpose": "Iterate through asset requests until all items are processed.",
+      "technical_outline": {
+        "behavior": "process each item sequentially; return to loop after saving output",
+        "outputs": [
+          "done",
+          "loop"
+        ]
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": "Manual Trigger",
+      "to": "Set Asset Request",
+      "output": "main"
+    },
+    {
+      "from": "Set Asset Request",
+      "to": "Prepare Batch Items",
+      "output": "main"
+    },
+    {
+      "from": "Prepare Batch Items",
+      "to": "Process Batch",
+      "output": "main"
+    },
+    {
+      "from": "Read Asset Registry",
+      "to": "Build Variation Constraints",
+      "output": "main"
+    },
+    {
+      "from": "Build Variation Constraints",
+      "to": "Generate Asset Brief (LLM)",
+      "output": "main"
+    },
+    {
+      "from": "Generate Asset Brief (LLM)",
+      "to": "Parse Structured Brief",
+      "output": "main"
+    },
+    {
+      "from": "Parse Structured Brief",
+      "to": "Generate Image (Image Model)",
+      "output": "main"
+    },
+    {
+      "from": "Generate Image (Image Model)",
+      "to": "Parse Image Result",
+      "output": "main"
+    },
+    {
+      "from": "Parse Image Result",
+      "to": "Save Asset Metadata",
+      "output": "main"
+    },
+    {
+      "from": "Save Asset Metadata",
+      "to": "Process Batch",
+      "output": "main"
+    },
+    {
+      "from": "Process Batch",
+      "to": "Batch Completed",
+      "output": "done"
+    },
+    {
+      "from": "Process Batch",
+      "to": "Read Asset Registry",
+      "output": "loop"
+    }
+  ],
+  "sharing_note": "Review employer confidentiality and IP permissions before public use; de-identification alone does not grant publication rights."
+}
