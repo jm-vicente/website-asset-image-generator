@@ -22,4 +22,4 @@ The architecture illustrates request configuration → per-item processing → v
 
 ## Confidentiality
 
-This is a portfolio adaptation, **not an exact reproduction** of the original implementation or business purpose. Company data, production configuration, and sensitive business specifics are not included. Public release should still be checked against applicable confidentiality and intellectual-property obligations.
+This is a portfolio adaptation, **not an exact reproduction** of the original implementation or business purpose. Company data, production configuration, and sensitive business specifics are not included. 
